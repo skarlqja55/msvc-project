@@ -16,6 +16,61 @@ typedef enum{
 static cli_input_state_t input_state=CLI_STATE_NORMAL;
 static cli_callback_t ctrl_c_handler=NULL;
 
+static void cliRedrawTail(void){
+
+    //커서 뒤쪽 글자 다시 출력
+    for(int i=cli_cursor; i<cli_line_idx; i++){
+        cliPrintf("%c",cli_line_buf[i]);
+    }
+
+    //기존 마지막 글자 흔적 삭제
+    cliPrintf(" ");
+
+    //다시 원래 커서 위치까지 뒤로 이동
+    for(int i=cli_cursor; i<=cli_line_idx; i++){
+        cliPrintf("\b");
+    }
+}
+
+
+static void handleCharacterInsert(uint8_t c){
+    if(cli_line_idx>=CLI_LINE_BUF_MAX-1) return;
+
+    for(int i=cli_line_idx; i>cli_cursor; i--){
+        cli_line_buf[i]=cli_line_buf[i-1];
+    }
+    cli_line_buf[cli_cursor]=c;
+    cli_line_idx++;
+    cli_cursor++;
+
+    cliPrintf("%c",c);
+    for(int i=cli_cursor; i<cli_line_idx; i++){
+        cliPrintf("%c",cli_line_buf[i]);
+    }
+    for(int i=cli_cursor; i<cli_line_idx; i++){
+        cliPrintf("\b");
+    }
+
+}
+
+
+
+static void handleBackspace(void){
+    if(cli_cursor==0) return;
+
+    for (int i = cli_cursor; i < cli_line_idx; i++)
+{
+    cli_line_buf[i - 1] = cli_line_buf[i];
+}
+
+    cli_line_idx--;
+    cli_cursor--;
+    cliPrintf("\b");
+    cliRedrawTail();
+    
+    
+}
+
 
 
 
@@ -37,8 +92,34 @@ void cliInit(void)
 
 void cliMain(void)
 {
+    uint8_t rx_data;
+    if(uartReadBlock(0,&rx_data,0xFFFFFFFF)==true){
+            switch(rx_data)
+            {
+                case 0x03://ctrl+c
+                    cliPrintf("^C\r\nExiting application...\r\n");
+                    exit(0);
+                    break;
 
+                case '\b':
+                case 127:
+                    handleBackspace();
+                    break;
+
+                default:
+                    if(32<=rx_data && rx_data<=126){
+                        handleCharacterInsert(rx_data);
+
+             
+             
+                    }
+                    break;
+
+
+                }             
+    }
 }
+
 void cliPrintf(char *fmt, ...)
 {
     char buf[256];
