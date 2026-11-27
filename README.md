@@ -21,4 +21,4 @@ cmake --build build --config Debug
 
 ## 현재 구현 범위
 
-문자 삽입과 삭제 로직을 따라가려면 `cliMain()` → `handleCharacterInsert()` 또는 `handleBackspace()` 순서로 읽으면 됩니다. 현재 `rx_pop()`의 빈 버퍼 판정이 뒤집혀 있어 입력 경로에는 수정이 필요합니다. 명령 등록용 `cliAdd()`와 Ctrl 핸들러 설정 함수는 빈 구현입니다. 이 저장소에는 Windows C 실습이 담겨 있습니다.
+문자 삽입과 삭제 로직을 따라가려면 `cliMain()` → `handleCharacterInsert()` 또는 `handleBackspace()` 순서로 읽으면 됩니다. 별도 보완에서 `rx_pop()`이 빈 버퍼에서는 즉시 반환하고 데이터가 있으면 먼저 들어온 바이트를 꺼내도록 수정했습니다. 시작 시 콘솔 핸들을 초기화하고, 방향키 시퀀스가 입력 문자열에 문자로 남지 않게 했습니다. 방향키로 커서를 옮기는 동작은 구현 범위에 포함되지 않습니다. 명령 등록용 `cliAdd()`와 Ctrl 핸들러 설정 함수는 빈 구현입니다. 이 저장소에는 Windows C 실습이 담겨 있습니다.

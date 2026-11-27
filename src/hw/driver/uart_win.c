@@ -21,7 +21,7 @@ static void rx_push(uint8_t c)
 }
 
 static bool rx_pop(uint8_t* p_data){
-    if(rx_head!=rx_tail){
+    if (rx_head == rx_tail) {
         
         return false;
     }
@@ -75,15 +75,17 @@ bool uartReadBlock(uint8_t ch, uint8_t* p_data, uint32_t timeout)
     int c=_getch();
     if(c==0x00 || c==0xE0){
         int key=_getch();
-        rx_push('\x18');
-        rx_push('[');
-        switch(key){
-            case 72: rx_push('A');    break; //up
-            case 80: rx_push('B');   break; //down
-            case 77: rx_push('C');   break; //Right
-            case 75: rx_push('D');   break; //Left
-            default: break;
+        uint8_t direction;
+        switch (key) {
+            case 72: direction = 'A'; break;
+            case 80: direction = 'B'; break;
+            case 77: direction = 'C'; break;
+            case 75: direction = 'D'; break;
+            default: return false;
         }
+        rx_push('\x1b');
+        rx_push('[');
+        rx_push(direction);
 
         return rx_pop(p_data);
 

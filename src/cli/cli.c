@@ -94,6 +94,18 @@ void cliMain(void)
 {
     uint8_t rx_data;
     if(uartReadBlock(0,&rx_data,0xFFFFFFFF)==true){
+            if (input_state == CLI_STATE_ESC_RCVD) {
+                input_state = rx_data == '[' ? CLI_STATE_BRACKET_RCVD : CLI_STATE_NORMAL;
+                return;
+            }
+            if (input_state == CLI_STATE_BRACKET_RCVD) {
+                input_state = CLI_STATE_NORMAL;
+                return;
+            }
+            if (rx_data == 0x1b) {
+                input_state = CLI_STATE_ESC_RCVD;
+                return;
+            }
             switch(rx_data)
             {
                 case 0x03://ctrl+c
